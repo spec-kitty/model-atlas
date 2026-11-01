@@ -8,7 +8,7 @@
 - Node 24.22.2: `npm run build`, `npm run typecheck`, `npm test` — passed, 36 tests.
 - Node 22/24 binaries obtained through isolated `npm exec --package=node@<major>` environments. System Node is 25.2.1.
 - `npm pack --dry-run`: passed; package contains JavaScript/declarations under `dist`, README, canonical LICENSE, and package metadata, with no fixtures, credentials or development files.
-- `pnpm add git+file:///Users/robert/model-atlas#<commit>` in a temporary consumer: passed; Git dependency preparation ran the build, and importing the public ESM package worked.
+- `pnpm add git+file:///path/to/model-atlas#<commit>` in a temporary consumer: passed; Git dependency preparation ran the build, and importing the public ESM package worked.
 - External TypeScript ESM consumer compiled against emitted declarations with strict checking and no `skipLibCheck`.
 - `git diff --check`: passed.
 - LICENSE and all original fixtures remain unchanged.
