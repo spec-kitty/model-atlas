@@ -57,9 +57,8 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
       for (const [name, cap] of [['text', 'textInput'], ['image', 'imageInput'], ['audio', 'audioInput'], ['video', 'videoInput']] as const) {
         add(`capabilities.${cap}`, input.includes(name));
       }
-      // Generic "file" is not proof of PDF support. Keep PDF unknown in that case.
+      // Neither generic "file" nor PDF's absence establishes PDF support or rejection.
       if (input.includes('pdf')) add('capabilities.pdfInput', true);
-      else if (!input.includes('file')) add('capabilities.pdfInput', false);
     }
     if (strings(output)) {
       add('capabilities.textOutput', output.includes('text')); add('capabilities.imageOutput', output.includes('image'));

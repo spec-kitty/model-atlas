@@ -1,9 +1,11 @@
 import type { CatalogConfig, ProviderConfig, SourceSnapshot, StoredModel } from './types.ts';
 import type { Transport } from './transport.ts';
-import { append, auth, baseUrl, object, string } from './transport.ts';
+import { append, auth, baseUrl, object, RequestError, string } from './transport.ts';
 import { normalize, mergeClaims } from './normalize.ts';
 
-export async function loadProvider(config: ProviderConfig, request: Transport, at: string, clean: (s: string) => string) {
+interface LoadedSource { state: SourceSnapshot; skipped: number; warnings?: string[] }
+
+export async function loadProvider(config: ProviderConfig, request: Transport, at: string, clean: (s: string) => string): Promise<LoadedSource> {
   const base = baseUrl(config); const headers = auth(config);
   const source = `provider:${config.id}`;
   const path = config.kind === 'anthropic' ? 'v1/models' : config.kind === 'fireworks' ? `accounts/${encodeURIComponent(config.account ?? 'fireworks')}/models` : 'models';
@@ -11,6 +13,7 @@ export async function loadProvider(config: ProviderConfig, request: Transport, a
   if (config.kind === 'anthropic') url.searchParams.set('limit', '1000');
   if (config.kind === 'fireworks') url.searchParams.set('pageSize', '200');
   const models = new Map<string, StoredModel>(); let skipped = 0;
+  const warnings: string[] = [];
   const absorb = (items: unknown[], via: string) => {
     for (const item of items) {
       const model = normalize(item, { source: 'endpoint', via, at, provider: config.id, kind: config.kind, clean });
@@ -43,12 +46,15 @@ export async function loadProvider(config: ProviderConfig, request: Transport, a
     try {
       const r = object(await request(new URL('/model/info', base), headers));
       if (Array.isArray(r.data)) absorb(r.data, `${config.id}:/model/info`);
-    } catch { /* Opportunistic enrichment: failure is deliberately silent. */ }
+      else warnings.push('Optional /model/info enrichment failed: Invalid listing shape');
+    } catch (error) {
+      warnings.push(`Optional /model/info enrichment failed: ${error instanceof RequestError ? error.message : 'Invalid enrichment data'}`);
+    }
   }
   const state: SourceSnapshot = { source, kind: 'provider', at, hostname: base.hostname, models: [...models.values()] };
-  return { state, skipped };
+  return { state, skipped, warnings };
 }
-export async function loadCatalog(config: CatalogConfig, request: Transport, at: string, clean: (s: string) => string) {
+export async function loadCatalog(config: CatalogConfig, request: Transport, at: string, clean: (s: string) => string): Promise<LoadedSource> {
   const url = new URL(config.kind === 'models.dev' ? 'https://models.dev/api.json' : 'https://openrouter.ai/api/v1/models');
   const raw = await request(url, new Headers({ accept: 'application/json' }));
   const models: StoredModel[] = []; let skipped = 0;

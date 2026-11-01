@@ -42,9 +42,15 @@ function rejectedParameter(text: string): string | undefined {
 export function makeTransport(fetcher: typeof fetch, timeoutMs: number, maxBytes: number) {
   return async (url: URL, headers: Headers, body?: unknown): Promise<unknown> => {
     const controller = new AbortController();
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => { controller.abort(); reject(new RequestError('Request timed out')); }, timeoutMs);
+      timer = setTimeout(() => {
+        controller.abort();
+        // Injected fetch implementations may not connect their body stream to the signal.
+        void reader?.cancel().catch(() => {});
+        reject(new RequestError('Request timed out'));
+      }, timeoutMs);
     });
     const work = async () => {
       try {
@@ -52,20 +58,25 @@ export function makeTransport(fetcher: typeof fetch, timeoutMs: number, maxBytes
           method: body === undefined ? 'GET' : 'POST', headers, signal: controller.signal,
           redirect: 'error', ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         });
+        if (controller.signal.aborted) {
+          void response.body?.cancel().catch(() => {});
+          throw new RequestError('Request timed out');
+        }
         const length = Number(response.headers.get('content-length'));
         if (length > maxBytes) { controller.abort(); void response.body?.cancel().catch(() => {}); throw new RequestError('Response too large'); }
-        const reader = response.body?.getReader();
+        reader = response.body?.getReader();
         let total = 0;
         const parts: Uint8Array[] = [];
         try {
           if (reader) while (true) {
             const { done, value } = await reader.read();
+            if (controller.signal.aborted) throw new RequestError('Request timed out');
             if (done) break;
             total += value.byteLength;
             if (total > maxBytes) { controller.abort(); void reader.cancel().catch(() => {}); throw new RequestError('Response too large'); }
             parts.push(value);
           }
-        } finally { reader?.releaseLock(); }
+        } finally { reader?.releaseLock(); reader = undefined; }
         const bytes = new Uint8Array(total);
         let offset = 0;
         for (const part of parts) { bytes.set(part, offset); offset += part.length; }
@@ -82,6 +93,7 @@ export function makeTransport(fetcher: typeof fetch, timeoutMs: number, maxBytes
         throw new RequestError('Network request failed');
       }
     };
+    // Promise.race observes both promises, including a late work rejection after timeout.
     try { return await Promise.race([work(), timeout]); }
     finally { clearTimeout(timer); }
   };
@@ -124,8 +136,18 @@ export function makeSanitizer(providers: ProviderConfig[]) {
       }
     } catch { /* Invalid config is reported as a source failure. */ }
   }
+  const variants = new Set<string>();
+  for (const secret of secrets) {
+    variants.add(secret);
+    for (const encoded of [encodeURIComponent(secret), new URLSearchParams({ v: secret }).toString().slice(2)]) {
+      variants.add(encoded);
+      variants.add(encoded.replace(/%[0-9A-F]{2}/g, s => s.toLowerCase()));
+    }
+    variants.add(Buffer.from(secret).toString('base64'));
+    variants.add(Buffer.from(secret).toString('base64url'));
+  }
   return (value: string): string => {
-    for (const secret of secrets) if (value.includes(secret) || value.includes(encodeURIComponent(secret))) return '[redacted]';
+    for (const secret of variants) if (value.includes(secret)) return '[redacted]';
     return value.replace(/https?:\/\/[^\s"<>]+/gi, raw => { try { return new URL(raw).hostname; } catch { return '[url]'; } });
   };
 }

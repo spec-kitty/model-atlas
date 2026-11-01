@@ -3,7 +3,7 @@ import { addClaim, priority, validField } from './normalize.ts';
 import { date, object, string } from './transport.ts';
 
 /** Reconstruct only known fields. Unknown properties (including credentials) never survive. */
-export function restoreSnapshot(raw: unknown, clean: (s: string) => string): { sources: SourceSnapshot[]; additions: StoredModel[]; warnings: string[] } {
+export function restoreSnapshot(raw: unknown, clean: (s: string) => string, nowMs: number): { sources: SourceSnapshot[]; additions: StoredModel[]; warnings: string[] } {
   const warnings: string[] = []; const s = object(raw);
   const sources: SourceSnapshot[] = []; const additions: StoredModel[] = [];
   if (raw === undefined) return { sources, additions, warnings };
@@ -31,6 +31,7 @@ export function restoreSnapshot(raw: unknown, clean: (s: string) => string): { s
     }
     const kind = source.kind as SourceSnapshot['kind'];
     if (!source.source.startsWith(`${kind}:`)) { warnings.push('Skipped malformed snapshot source'); continue; }
+    if (Date.parse(source.at) > nowMs) warnings.push('Snapshot source timestamp is in the future; source is stale');
     let hostname = '';
     if (string(source.hostname)) {
       try { hostname = new URL(`https://${source.hostname}`).hostname; } catch { /* Discard invalid hosts. */ }

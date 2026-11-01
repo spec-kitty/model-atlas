@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Report optional enrichment failures as sanitized refresh warnings; keep PDF support unknown without explicit evidence.
+- Treat future source timestamps as stale and warn on snapshot restore; identify probe cache failures with `capability: 'cache'`.
+- Cancel body readers and late responses from injected fetch implementations after timeout; redact common URL/form and base64 secret encodings.
+- Resolve the DeepSeek review with per-finding dispositions and additional boundary, persistence, catalog and transport tests.
 - Require parameter-specific evidence for reasoning and structured-output rejections; accepted invalid JSON stays inconclusive, and echoed request fields no longer identify rejected parameters.
 - Validate reasoning effort arrays, probe default levels for empty published lists, and preserve unknown effort lists after isolated rejections.
 - Attempt forced tool choice when support is unknown, with one retry without it on a choice-specific rejection; route explicit default Fireworks bases to inference.

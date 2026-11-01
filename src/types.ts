@@ -51,7 +51,7 @@ export interface SourceSnapshot {
 export interface AtlasSnapshot {
   version: 1; createdAt: string; sources: SourceSnapshot[]; additions: StoredModel[];
 }
-export interface RefreshReport { source: string; ok: boolean; models: number; skipped: number; error?: string }
+export interface RefreshReport { source: string; ok: boolean; models: number; skipped: number; error?: string; warnings?: string[] }
 export interface Explanation {
   model: ModelRecord; claims: Claims;
   catalogMatches: Array<{ catalog: string; status: 'matched' | 'ambiguous' | 'unmatched'; keys: string[] }>;
@@ -65,7 +65,7 @@ export interface SelectOptions {
 export interface Candidate { model: ModelRecord; score: number; reasons: string[]; unknown: Capability[] }
 export type ProbeCapability = 'imageInput' | 'tools' | 'structuredOutput' | 'temperature' | 'topP' | 'reasoning';
 export type ProbeRequest = ProbeCapability | { capability: 'reasoning'; efforts: string[] };
-export interface ProbeReport { capability: ProbeCapability; effort?: string; ok: boolean; value?: boolean; error?: string }
+export interface ProbeReport { capability: ProbeCapability | 'cache'; effort?: string; ok: boolean; value?: boolean; error?: string }
 export interface AtlasOptions {
   providers?: ProviderConfig[]; catalogs?: CatalogConfig[]; fetch?: typeof globalThis.fetch;
   now?: () => Date; snapshot?: unknown; maxAgeMs?: number; timeoutMs?: number; maxResponseBytes?: number;

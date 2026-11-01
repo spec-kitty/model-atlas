@@ -17,6 +17,9 @@ Unit tests use fixture JSON and injected fetch only. No test contacts a live end
 
 ## Independent review follow-up
 
+- DeepSeek follow-up: per-bullet decisions for all 99 review items are in [DEEPSEEK-REVIEW.md](DEEPSEEK-REVIEW.md); six code issues and 36 coverage gaps accepted, two items already fixed, 55 rejected.
+- DeepSeek follow-up: `npm run build`, `npm run typecheck`, `npm test`, and `git diff --check` pass; 63 tests on Node 25.2.1, with mocked network responses only.
+
 - Node 25.2.1: `npm run build`, `npm run typecheck`, `npm test` — passed, 48 tests.
 - Accepted Kimi findings 1–6 and 8; accepted GLM findings 1–6 for the reasoning/structured-output, tool-choice, routing, input-validation, and coverage issues described in the changelog.
 - Rejected Kimi finding 7: pagination faults invalidate listing completeness. Committing partial pages would replace the previous listing and remove models on unfetched pages; the existing atomic failure behavior preserves prior data and its timestamp.

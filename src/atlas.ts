@@ -27,7 +27,7 @@ export function createAtlas(options: AtlasOptions = {}) {
   const maxAge = options.maxAgeMs ?? 24 * 60 * 60 * 1000;
   if (![timeout, maxBytes, maxAge].every(n => Number.isFinite(n) && n >= 0) || timeout === 0 || maxBytes === 0) throw new Error('Invalid resource limit');
   const request = makeTransport(options.fetch ?? globalThis.fetch, timeout, maxBytes);
-  const restored = restoreSnapshot(options.snapshot, clean);
+  const restored = restoreSnapshot(options.snapshot, clean, now().getTime());
   const sources = new Map(restored.sources.map(s => [s.source, s]));
   const additions = new Map(restored.additions.map(m => [key(m.provider, m.id), m]));
   let views = new Map<string, Explanation>();
@@ -101,7 +101,9 @@ export function createAtlas(options: AtlasOptions = {}) {
     toSnapshot,
     isStale(source: string): boolean {
       const s = sources.get(source) ?? sources.get(`provider:${source}`) ?? sources.get(`catalog:${source}`);
-      return !s || now().getTime() - Date.parse(s.at) > maxAge;
+      if (!s) return true;
+      const age = now().getTime() - Date.parse(s.at);
+      return age < 0 || age > maxAge;
     },
     setOverride<F extends Field>(provider: string, id: string, field: F, value: FieldValue<F> | null): void {
       if (!validField(field)) throw new Error('Unknown override field');
@@ -126,7 +128,8 @@ export function createAtlas(options: AtlasOptions = {}) {
           const job = jobs[i]!;
           if (result.status === 'fulfilled') {
             const { state, skipped } = result.value; sources.set(job.source, state);
-            reports.push({ source: job.source, ok: true, models: state.models.length, skipped });
+            const warnings = result.value.warnings ?? [];
+            reports.push({ source: job.source, ok: true, models: state.models.length, skipped, ...(warnings.length ? { warnings } : {}) });
           } else {
             // Only transport messages are trusted. Arbitrary thrown errors can contain credentials.
             const error = result.reason instanceof RequestError ? result.reason.message : 'Invalid source configuration, listing or pagination';
@@ -175,7 +178,7 @@ export function createAtlas(options: AtlasOptions = {}) {
         }
         rebuild();
         const cacheErrors = await persist();
-        if (cacheErrors.length) reports.push({ capability: requests.length ? (typeof requests[0] === 'string' ? requests[0] : requests[0]!.capability) : 'reasoning', ok: false, error: 'Cache save failed' });
+        if (cacheErrors.length) reports.push({ capability: 'cache', ok: false, error: 'Cache save failed' });
         return reports;
       });
     },
