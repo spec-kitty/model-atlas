@@ -35,6 +35,7 @@ for (const [kind, file, id] of [
       assert.equal(m.capabilities.tools?.value, true); assert.equal(m.capabilities.pdfInput, undefined);
       assert.equal(m.pricing?.value.inputPerMTok, 0.1); assert.equal(m.pricing?.value.cacheReadPerMTok, 0.01);
       assert.equal(m.pricing?.value.cacheWritePerMTok, 0.125); assert.equal(m.limits.contextTokens?.value, 1_000_000);
+      assert.equal(m.limits.maxOutputTokens?.value, 128_000);
       assert.equal(atlas.supports('p', 'z-ai/glm-5.3', 'imageInput'), false);
     } else if (kind === 'openai-compatible') {
       assert.equal(m.capabilities.imageInput?.value, true); assert.equal(m.capabilities.parallelToolCalls?.value, true);
@@ -129,4 +130,31 @@ test('malformed catalog entries and hostile optional fields are safely discarded
   assert.equal(reports[1]?.skipped, 3); assert.equal(atlas.supports('p', 'm', 'tools'), true);
   assert.equal(atlas.supports('p', 'm', 'temperature'), undefined);
   assert.equal(atlas.model('p', 'm')?.releasedAt, undefined);
+});
+
+test('future expiration is deprecated with a retirement date', async () => {
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openrouter' }], fetch: mock(() => ({ data: [{ id: 'm', expiration_date: '2027-01-01' }] })) });
+  await atlas.refresh();
+  assert.deepEqual(atlas.model('p', 'm')?.lifecycle?.value, { status: 'deprecated', retiresAt: '2027-01-01' });
+  assert.equal(atlas.select({ requires: {} }).length, 1);
+});
+
+test('catalog edits do not establish release dates or affect newest preference', async () => {
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai' }], catalogs: [modelsDev()], fetch: mock(url => url.hostname === 'models.dev'
+    ? { vendor: { models: { edited: { last_updated: '2026-11-01' }, released: { release_date: '2025-01-01', last_updated: '2026-11-01' } } } }
+    : { data: [{ id: 'edited' }, { id: 'released' }] }) });
+  await atlas.refresh();
+  assert.equal(atlas.model('p', 'edited')?.releasedAt, undefined);
+  assert.equal(atlas.model('p', 'released')?.releasedAt?.value, '2025-01-01');
+  assert.deepEqual(atlas.select({ requires: {}, prefer: ['newest'] }).map(c => c.model.id), ['released', 'edited']);
+});
+
+test('endpoint provenance includes the requested base path without query secrets', async () => {
+  for (const path of ['/v1', '/gateway/v2']) {
+    const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai-compatible', baseUrl: `https://gateway.test${path}?key=SECRET` }],
+      fetch: mock(url => url.pathname === '/model/info' ? { data: [] } : { data: [{ id: 'm', capabilities: { vision: true } }] }) });
+    await atlas.refresh();
+    assert.equal(atlas.model('p', 'm')?.capabilities.imageInput?.via, `p:${path}/models`);
+    assert.equal(JSON.stringify(atlas.toSnapshot()).includes('SECRET'), false);
+  }
 });

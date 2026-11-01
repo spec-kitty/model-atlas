@@ -64,7 +64,7 @@ Each config has `{ id, kind, baseUrl?, apiKey?, headers?, account? }`. `id` is y
 | `openrouter` | `https://openrouter.ai/api/v1/models`; custom base includes `/api/v1` | Optional Bearer; listing is public |
 | `fireworks` | `https://api.fireworks.ai/v1/accounts/{account}/models?pageSize=200`; account defaults to `fireworks` | Bearer; follows `nextPageToken` using `pageToken` |
 
-`baseUrl` can override any provider for tests or proxies. Fireworks probes use `https://api.fireworks.ai/inference/v1/chat/completions` by default; a supplied custom base is also used for probes. For separate custom Fireworks control-plane and inference origins, use a separate `openai-compatible` provider config for inference.
+`baseUrl` can override any provider for tests or proxies. Fireworks probes use `https://api.fireworks.ai/inference/v1/chat/completions` by default, including when `baseUrl` explicitly names the default control plane (`https://api.fireworks.ai/v1`). Other custom bases are also used for probes. For separate custom Fireworks control-plane and inference origins, use a separate `openai-compatible` provider config for inference.
 
 Gateway survey, **verified 1 November 2026** (a dated survey, not a promised current model count):
 
@@ -87,14 +87,14 @@ type SourceKind = 'override' | 'probe' | 'endpoint' | 'catalog' | 'default';
 interface Claim<T> {
   value: T;
   source: SourceKind;
-  via: string; // e.g. 'tokenfactory:/models', 'models.dev', 'probe:imageInput'
+  via: string; // e.g. 'tokenfactory:/v1/models', 'models.dev', 'probe:imageInput'
   at: string;  // ISO observation timestamp
 }
 ```
 
 Per field: **override > probe > endpoint > catalog > default**. `null` and missing values mean unknown, never false. Equal-precedence claims use the newest observation timestamp, then later insertion. Refresh jobs commit in configured order; within a listing, later entries/fields win ties. LiteLLM enrichment follows the primary listing. Pricing and lifecycle are atomic claim values; limits, capabilities and reasoning arrays are separate fields.
 
-`ModelRecord` contains `provider`, `id`, optional `displayName`, `capabilities`, `reasoning.efforts` / `thinkingModes`, `limits.contextTokens` / `maxInputTokens` / `maxOutputTokens`, optional `pricing`, `lifecycle`, and `catalogMatch`. It also exposes `releasedAt`, a claim derived from the upstream creation/release date (models.dev `last_updated` is a fallback), used by the `newest` preference. A refresh timestamp is never used to infer model age.
+`ModelRecord` contains `provider`, `id`, optional `displayName`, `capabilities`, `reasoning.efforts` / `thinkingModes`, `limits.contextTokens` / `maxInputTokens` / `maxOutputTokens`, optional `pricing`, `lifecycle`, and `catalogMatch`. It also exposes `releasedAt`, a claim derived from the upstream creation/release date, used by the `newest` preference. Catalog edit dates (`last_updated`) and refresh timestamps are never used to infer model age. Endpoint `via` values include the request pathname, including any base path, without query parameters.
 
 Capabilities:
 
@@ -138,17 +138,19 @@ await atlas.probe('tokenfactory', 'kimi-k3', [
 ]);
 ```
 
-OpenAI-compatible providers use `/chat/completions`; Anthropic uses native `/v1/messages`, image source blocks, tools, `output_config.format` for JSON schema, and adaptive thinking with `output_config.effort`. String `'reasoning'` tests published effort levels, or `low`, `medium`, `high` if none are known.
+OpenAI-compatible providers use `/chat/completions`; Anthropic uses native `/v1/messages`, image source blocks, tools, `output_config.format` for JSON schema, and adaptive thinking with `output_config.effort`. String `'reasoning'` tests published effort levels, or `low`, `medium`, `high` if the list is absent or empty. Explicit effort arrays must contain 1–32 tokens matching `[a-z][a-z0-9_-]{0,31}`; invalid input returns an error report without a request.
 
 | Probe | Evidence |
 | --- | --- |
 | `imageInput` | Embedded PNG containing blue **7381** and a red circle; asks for the number. Reply containing `7381` → true; wrong reply or HTTP 400/422 → false |
-| `tools` | One `ping` tool; required choice when tool choice is known supported (or on Anthropic). Returned `ping` call → true; HTTP 400 → false; no call → inconclusive |
-| `structuredOutput` | Minimal JSON schema. Accepted, parseable JSON → true; malformed JSON or HTTP 400/422 → false. This does not validate arbitrary schemas |
+| `tools` | One `ping` tool; required choice unless tool choice is known unsupported. A 400/422 naming `tool_choice` retries once without forced choice. Returned `ping` call → true; other HTTP 400 → false; no call → inconclusive |
+| `structuredOutput` | Minimal JSON schema. Accepted, parseable JSON → true; HTTP 400/422 naming `response_format` (Anthropic: `output_config.format`) → false; malformed JSON or unrelated rejections → inconclusive. This does not validate arbitrary schemas |
 | `temperature`, `topP` | Sends the parameter. Accepted → true; HTTP 400 naming that parameter → false; unrelated rejection → inconclusive |
-| Reasoning efforts | Tests each level. Accepted levels are added, HTTP 400/422 removes the tested level from the effort list. One rejected level does not establish that reasoning as a whole is unavailable |
+| Reasoning efforts | Tests each level. Accepted levels are added; HTTP 400/422 naming `reasoning_effort` (Anthropic: `output_config.effort` or `effort`) removes the tested level from a known effort list. Rejection without a known list leaves it unknown. Unrelated errors, including thinking-budget errors, are inconclusive |
 
 HTTP 401/403/429/5xx, network failures, timeouts, invalid envelopes and oversized responses produce **no new claim**, only sanitized error reports. Earlier evidence remains. Probe reports are `{ capability, effort?, ok, value?, error? }`; `ok: true, value: false` means a conclusive negative result, not a transport failure. Reasoning claims preserve observed effort-list changes and their `probe:reasoning:<level>` provenance; untested published efforts remain in the list.
+
+Parameter-specific rejections use structured error parameters or messages beginning with a recognized parameter rejection. Echoed request fields are ignored. One rejected effort does not establish that reasoning as a whole is unavailable.
 
 ## Selection
 

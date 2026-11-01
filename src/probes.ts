@@ -29,9 +29,22 @@ export async function runProbe(config: ProviderConfig, model: string, capability
   else if (anthropic) { body.thinking = { type: 'adaptive' }; body.output_config = { effort }; }
   else body.reasoning_effort = effort;
   try {
-    let base = baseUrl(config);
-    if (config.kind === 'fireworks' && !config.baseUrl) base = new URL('https://api.fireworks.ai/inference/v1');
-    const r = object(await request(append(base, anthropic ? 'v1/messages' : 'chat/completions'), auth(config), body));
+    const base = baseUrl(config);
+    if (config.kind === 'fireworks' && base.origin === 'https://api.fireworks.ai' && base.pathname.replace(/\/$/, '') === '/v1') {
+      base.pathname = '/inference/v1';
+    }
+    const url = append(base, anthropic ? 'v1/messages' : 'chat/completions');
+    const headers = auth(config);
+    let response: unknown;
+    try { response = await request(url, headers, body); }
+    catch (error) {
+      // A rejected forced choice says nothing about tool use itself. Retry once without it.
+      if (capability !== 'tools' || !requireTool || !(error instanceof RequestError)
+        || ![400, 422].includes(error.status ?? 0) || error.parameter !== 'tool_choice') throw error;
+      delete body.tool_choice;
+      response = await request(url, headers, body);
+    }
+    const r = object(response);
     const message = object(object(Array.isArray(r.choices) ? r.choices[0] : undefined).message);
     const blocks = Array.isArray(r.content) ? r.content.map(object) : [];
     const content = anthropic ? blocks.filter(b => b.type === 'text').map(b => b.text).filter(t => typeof t === 'string').join('') : message.content;
@@ -47,7 +60,8 @@ export async function runProbe(config: ProviderConfig, model: string, capability
       if (!value) return { ...report, error: 'No tool call returned; inconclusive' };
     } else if (capability === 'structuredOutput') {
       if (typeof content !== 'string') return { ...report, error: 'Missing probe reply' };
-      try { JSON.parse(content); value = true; } catch { value = false; }
+      try { JSON.parse(content); value = true; }
+      catch { return { ...report, error: 'Invalid JSON in accepted response' }; }
     } else value = true;
     return { ...report, ok: true, value };
   } catch (error) {
@@ -55,7 +69,8 @@ export async function runProbe(config: ProviderConfig, model: string, capability
       const status = error.status;
       const rejected = status === 400 || status === 422;
       const definitive = (capability === 'imageInput' && rejected) || (capability === 'tools' && status === 400)
-        || (['structuredOutput', 'reasoning'].includes(capability) && rejected)
+        || (capability === 'structuredOutput' && rejected && error.parameter === (anthropic ? 'output_config.format' : 'response_format'))
+        || (capability === 'reasoning' && rejected && (anthropic ? ['output_config.effort', 'effort'].includes(error.parameter ?? '') : error.parameter === 'reasoning_effort'))
         || (status === 400 && error.parameter === (capability === 'temperature' ? 'temperature' : capability === 'topP' ? 'top_p' : ''));
       if (definitive) return { ...report, ok: true, value: false };
       return { ...report, error: error.message };

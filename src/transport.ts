@@ -14,6 +14,30 @@ export const strings = (x: unknown): x is string[] => Array.isArray(x) && x.leng
 export const number = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 export const date = (x: unknown): x is string => string(x) && /^\d{4}-\d\d-\d\d(?:T.*)?$/.test(x) && Number.isFinite(Date.parse(x));
 
+/** Keep only a recognized rejected parameter, never echoed requests or server text. */
+function rejectedParameter(text: string): string | undefined {
+  const parameters = ['temperature', 'top_p', 'reasoning_effort', 'output_config.effort', 'effort',
+    'response_format', 'output_config.format', 'tool_choice'];
+  let message: unknown = text;
+  try {
+    const root = object(JSON.parse(text));
+    const error = root.error === undefined ? root : object(root.error);
+    const param = error.param ?? error.parameter;
+    // An explicit different parameter takes priority over incidental mentions in the message.
+    if (param !== undefined && param !== null) {
+      return typeof param === 'string' ? parameters.find(p => param === p || param.startsWith(`${p}.`)) : undefined;
+    }
+    message = error.message;
+  } catch { /* Plain-text errors must start with a parameter-specific rejection. */ }
+  if (typeof message !== 'string') return undefined;
+  return parameters.find(p => {
+    const name = p.replaceAll('.', '\\.');
+    const token = `["'\x60]?${name}["'\x60]?(?=\\s|:|$)`;
+    return new RegExp(`^(?:unsupported|invalid|unknown|unrecognized)(?: value for)?(?: (?:parameter|field|argument))?[:\\s]+${token}`, 'i').test(message.trim())
+      || new RegExp(`^(?:the )?(?:(?:parameter|field|argument) )?${token}(?:\\s+is)?[:\\s]+(?:not supported|unsupported|invalid|not allowed|must be)\\b`, 'i').test(message.trim());
+  });
+}
+
 /** Config remains private to request closures. Only normalized data leaves the transport. */
 export function makeTransport(fetcher: typeof fetch, timeoutMs: number, maxBytes: number) {
   return async (url: URL, headers: Headers, body?: unknown): Promise<unknown> => {
@@ -48,7 +72,7 @@ export function makeTransport(fetcher: typeof fetch, timeoutMs: number, maxBytes
         const text = new TextDecoder().decode(bytes);
         if (!response.ok) {
           // Never expose server error text: gateways can echo credentials, URLs or prompts.
-          const parameter = ['temperature', 'top_p', 'reasoning_effort'].find(p => new RegExp(`\\b${p}\\b`, 'i').test(text));
+          const parameter = rejectedParameter(text);
           throw new RequestError(`HTTP ${response.status}`, response.status, parameter);
         }
         try { return JSON.parse(text) as unknown; }

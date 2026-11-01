@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Require parameter-specific evidence for reasoning and structured-output rejections; accepted invalid JSON stays inconclusive, and echoed request fields no longer identify rejected parameters.
+- Validate reasoning effort arrays, probe default levels for empty published lists, and preserve unknown effort lists after isolated rejections.
+- Attempt forced tool choice when support is unknown, with one retry without it on a choice-specific rejection; route explicit default Fireworks bases to inference.
+- Preserve full endpoint paths in provenance and exclude catalog edit dates from release-date ranking.
+- Add regression coverage for probe errors, normalization, source concurrency, selection, and catalog secret sanitization.
+
 ## 0.1.0
 
 - Initial TypeScript ESM release, Node 22+, with no runtime dependencies.

@@ -134,7 +134,7 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
     const limit = object(r.limit);
     add('limits.contextTokens', limit.context); add('limits.maxInputTokens', limit.input); add('limits.maxOutputTokens', limit.output);
     price(r.cost, ['input', 'output', 'cache_read', 'cache_write'], 1);
-    add('releasedAt', r.release_date ?? r.last_updated);
+    add('releasedAt', r.release_date);
     if (Array.isArray(r.reasoning_options)) {
       const modes: string[] = [];
       for (const option of r.reasoning_options) {

@@ -25,7 +25,7 @@ export async function loadProvider(config: ProviderConfig, request: Transport, a
     const r = object(await request(url, headers));
     const items = r.data ?? r.models;
     if (!Array.isArray(items)) throw new Error('Invalid listing shape');
-    absorb(items, `${config.id}:/${path}`);
+    absorb(items, `${config.id}:${url.pathname}`);
     let cursor: unknown;
     if (config.kind === 'anthropic' && r.has_more === true) {
       cursor = r.last_id;

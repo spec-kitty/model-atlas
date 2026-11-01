@@ -15,6 +15,15 @@
 
 Unit tests use fixture JSON and injected fetch only. No test contacts a live endpoint. CI has the same build/typecheck/test checks on Node 22 and 24, with the requested action SHAs.
 
+## Independent review follow-up
+
+- Node 25.2.1: `npm run build`, `npm run typecheck`, `npm test` — passed, 48 tests.
+- Accepted Kimi findings 1–6 and 8; accepted GLM findings 1–6 for the reasoning/structured-output, tool-choice, routing, input-validation, and coverage issues described in the changelog.
+- Rejected Kimi finding 7: pagination faults invalidate listing completeness. Committing partial pages would replace the previous listing and remove models on unfetched pages; the existing atomic failure behavior preserves prior data and its timestamp.
+- Rejected the image-probe portion of GLM finding 1: the task explicitly specifies HTTP 400/422 as a negative image result. That behavior remains unchanged.
+- Added assertions for all listed coverage gaps, including future retirement dates, OpenRouter output limits, default effort probes, catalog secret echoes, source concurrency, explicit model preferences, and Fireworks inference paths.
+- Live smoke output below is from initial implementation; this follow-up used mocked transports only.
+
 ## Live smoke
 
 Ran **once**, with `--probe`, using the existing `COMPATIBLE_API_KEY` from the authorized local environment file. The credential was passed to the child process environment; it was never printed or written. Exit code: **0**.

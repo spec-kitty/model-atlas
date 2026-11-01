@@ -67,6 +67,7 @@ test('selection false vs unknown, provider filters, context, lifecycle and deter
   assert.deepEqual(candidates[0]?.unknown, ['tools']); assert.ok(candidates[0]!.score > candidates[1]!.score);
   assert.deepEqual(atlas.select({ requires: {}, providers: ['p'], minContextTokens: 150, exclude: ['b', { provider: 'p', id: 'deprecated' }], prefer: ['cheapest', 'newest'] }).map(c => c.model.id), ['c']);
   assert.equal(atlas.select({ requires: {}, prefer: [{ provider: 'q' }] })[0]?.model.provider, 'q');
+  assert.deepEqual(atlas.select({ requires: {}, prefer: [{ provider: 'p', id: 'c' }] }).slice(0, 2).map(c => [c.model.provider, c.model.id]), [['p', 'c'], ['p', 'a']]);
   assert.equal(atlas.select({ requires: {}, providers: ['p'], prefer: ['newest'] })[0]?.model.id, 'b');
   assert.equal(atlas.select({ requires: {}, providers: ['p'], prefer: ['cheapest'] })[0]?.model.id, 'a');
   atlas.setOverride('p', 'a', 'lifecycle', { status: 'active', retiresAt: '2026-01-01' });
@@ -94,4 +95,32 @@ test('concurrent refresh/probe calls serialize state updates', async () => {
   }) });
   await Promise.all([atlas.refresh(), atlas.refresh(), atlas.probe('p', 'm', ['imageInput'])]);
   assert.equal(peak, 1); assert.equal(atlas.supports('p', 'm', 'imageInput'), true);
+});
+
+test('independent provider and catalog sources start concurrently within a refresh', async () => {
+  const started: string[] = [];
+  let release!: () => void;
+  const barrier = new Promise<void>(resolve => { release = resolve; });
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai' }, { id: 'q', kind: 'openrouter' }], catalogs: [modelsDev()],
+    fetch: mock(async url => {
+      started.push(url.hostname); await barrier;
+      return url.hostname === 'models.dev' ? {} : { data: [{ id: 'm' }] };
+    }) });
+  const refresh = atlas.refresh();
+  try {
+    await new Promise<void>(resolve => setImmediate(resolve));
+    assert.deepEqual(started.sort(), ['api.openai.com', 'models.dev', 'openrouter.ai']);
+  } finally { release(); await refresh; }
+});
+
+test('catalog claim values are scrubbed before snapshots, including losing claims', async () => {
+  const secret = 'CATALOG_ECHO_SECRET';
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai', apiKey: secret }], catalogs: [modelsDev()],
+    fetch: mock(url => url.hostname === 'models.dev' ? { vendor: { models: { m: { name: `Name ${secret}`, tool_call: true } } } }
+      : { data: [{ id: 'm', name: 'Endpoint name' }] }) });
+  await atlas.refresh();
+  assert.equal(atlas.explain('p', 'm')?.claims.displayName?.find(c => c.source === 'catalog')?.value, '[redacted]');
+  const json = JSON.stringify(atlas.toSnapshot());
+  assert.equal(json.includes(secret), false);
+  assert.deepEqual(createAtlas({ snapshot: JSON.parse(json), now }).explain('p', 'm'), atlas.explain('p', 'm'));
 });

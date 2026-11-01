@@ -147,23 +147,28 @@ export function createAtlas(options: AtlasOptions = {}) {
             reports.push({ capability, ok: false, error: 'Unsupported probe' }); continue;
           }
           const row = views.get(key(provider, id))?.model;
-          const efforts = capability === 'reasoning' ? (typeof input === 'object' ? input.efforts : row?.reasoning?.efforts?.value ?? ['low', 'medium', 'high']) : [undefined];
+          const published = row?.reasoning?.efforts;
+          const efforts = capability === 'reasoning' ? (typeof input === 'object' ? input.efforts : published?.value.length ? published.value : ['low', 'medium', 'high']) : [undefined];
           // Whitelist syntactic effort tokens to prevent unbounded or accidental prompt-sized requests.
-          if (efforts.length > 32 || efforts.some(e => e !== undefined && !/^[a-z][a-z0-9_-]{0,31}$/.test(e))) {
+          if (capability === 'reasoning' && (!Array.isArray(efforts) || efforts.length === 0 || efforts.length > 32
+            || [...efforts].some(e => typeof e !== 'string' || !/^[a-z][a-z0-9_-]{0,31}$/.test(e)))) {
             reports.push({ capability, ok: false, error: 'Invalid effort levels' }); continue;
           }
           const supported = new Set(row?.reasoning?.efforts?.value ?? []);
+          let knownEfforts = published !== undefined;
           let observedEffort = false;
           for (const effort of efforts) {
-            const report = await runProbe(config, id, capability, effort, config.kind === 'anthropic' || row?.capabilities.toolChoice?.value === true, request);
+            const report = await runProbe(config, id, capability, effort, row?.capabilities.toolChoice?.value !== false, request);
             reports.push(report);
             if (report.value === undefined) continue;
             if (capability === 'reasoning' && effort !== undefined) {
               observedEffort = true;
-              if (report.value) { supported.add(effort); add(provider, id, 'capabilities.reasoning', true, 'probe', `probe:reasoning:${effort}`); }
+              if (report.value) { knownEfforts = true; supported.add(effort); add(provider, id, 'capabilities.reasoning', true, 'probe', `probe:reasoning:${effort}`); }
               else supported.delete(effort);
               // A rejection of one effort does not establish absence of reasoning as a whole.
-              add(provider, id, 'reasoning.efforts', [...supported], 'probe', `probe:reasoning:${effort}`);
+              if (knownEfforts) {
+                add(provider, id, 'reasoning.efforts', [...supported], 'probe', `probe:reasoning:${effort}`);
+              }
             } else add(provider, id, `capabilities.${capability}`, report.value, 'probe', `probe:${capability}`);
           }
           if (observedEffort) rebuild();
