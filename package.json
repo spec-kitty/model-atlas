@@ -1,0 +1,19 @@
+{
+  "name": "@spec-kitty/model-atlas",
+  "version": "0.1.0",
+  "description": "Provenance-aware model capability catalog and deterministic router",
+  "type": "module",
+  "license": "MIT",
+  "author": "Spec Kitty, Inc.",
+  "repository": "github:spec-kitty/model-atlas",
+  "engines": { "node": ">=22" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "devDependencies": { "@types/node": "^22.0.0", "typescript": "~5.9.3" }
+}
