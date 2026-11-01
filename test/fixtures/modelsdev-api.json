@@ -742,5 +742,40 @@
     "canonical_model_id": "moonshotai/kimi-k3"
    }
   }
+ },
+ "nebius": {
+  "id": "nebius",
+  "name": "Nebius Token Factory",
+  "models": {
+   "Qwen/Qwen3-Embedding-8B": {
+    "id": "Qwen/Qwen3-Embedding-8B",
+    "name": "Qwen3 Embedding 8B",
+    "family": "qwen",
+    "type": "embedding",
+    "attachment": false,
+    "reasoning": false,
+    "tool_call": false,
+    "temperature": false,
+    "release_date": "2025-06-05",
+    "last_updated": "2025-06-05",
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "cost": {
+     "input": 0.01,
+     "output": 0
+    },
+    "limit": {
+     "context": 32768,
+     "output": 0
+    }
+   }
+  }
  }
 }

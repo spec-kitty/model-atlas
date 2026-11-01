@@ -62,6 +62,8 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
     }
     if (strings(output)) {
       add('capabilities.textOutput', output.includes('text')); add('capabilities.imageOutput', output.includes('image'));
+      // Only positive: a text-only output list does not establish that a model cannot embed.
+      if (output.includes('embedding') || output.includes('embeddings')) add('capabilities.embeddings', true);
     }
   };
   const price = (raw: unknown, keys: string[], factor: number) => {
@@ -86,7 +88,9 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
   add('limits.maxOutputTokens', r.max_output_tokens);
   add('limits.contextTokens', r.context_length);
   const architecture = object(r.architecture);
-  modality(architecture.input_modalities, architecture.output_modalities);
+  // Some listings (e.g. Nebius verbose) publish only the combined "text+image->text" form.
+  const [inputs, outputs] = string(architecture.modality) ? architecture.modality.split('->').map(m => m.split('+')) : [];
+  modality(architecture.input_modalities ?? inputs, architecture.output_modalities ?? outputs);
   if (strings(r.supported_parameters)) {
     const params = r.supported_parameters;
     const mapping = { tools: ['tools'], toolChoice: ['tool_choice'], parallelToolCalls: ['parallel_tool_calls'],
@@ -130,6 +134,8 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
   if (catalog) {
     bools(r, { reasoning: 'reasoning', tool_call: 'tools', structured_output: 'structuredOutput', temperature: 'temperature' });
     modality(object(r.modalities).input, object(r.modalities).output);
+    // models.dev lists embedding models with text output; its `type` field marks them.
+    if (r.type === 'embedding') add('capabilities.embeddings', true);
     const limit = object(r.limit);
     add('limits.contextTokens', limit.context); add('limits.maxInputTokens', limit.input); add('limits.maxOutputTokens', limit.output);
     price(r.cost, ['input', 'output', 'cache_read', 'cache_write'], 1);

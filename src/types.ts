@@ -25,6 +25,8 @@ export type ProviderKind = 'anthropic' | 'openai' | 'openai-compatible' | 'openr
 export interface ProviderConfig {
   id: string; kind: ProviderKind; baseUrl?: string; apiKey?: string;
   headers?: Record<string, string>; account?: string;
+  /** Extra query parameters for the model listing request only, e.g. `{ verbose: 'true' }`. */
+  listingParams?: Record<string, string>;
 }
 export interface CatalogConfig {
   id: string; kind: 'models.dev' | 'openrouter';

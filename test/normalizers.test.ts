@@ -158,3 +158,33 @@ test('endpoint provenance includes the requested base path without query secrets
     assert.equal(JSON.stringify(atlas.toSnapshot()).includes('SECRET'), false);
   }
 });
+
+test('listing params, combined modality strings and embedding outputs (Nebius verbose shape)', async () => {
+  const calls: URL[] = [];
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai-compatible', baseUrl: 'https://gateway.test/v1', listingParams: { verbose: 'true' } }],
+    fetch: mock(url => { calls.push(url); return url.pathname === '/model/info' ? { data: [] } : fixture('nebius-verbose-models'); }) });
+  assert.equal((await atlas.refresh())[0]?.ok, true);
+  assert.equal(calls[0]?.searchParams.get('verbose'), 'true');
+  assert.equal(calls[1]?.searchParams.has('verbose'), false);
+  assert.equal(atlas.supports('p', 'Qwen/Qwen2.5-VL-72B-Instruct', 'imageInput'), true);
+  assert.equal(atlas.supports('p', 'deepseek-ai/DeepSeek-V3', 'imageInput'), false);
+  assert.equal(atlas.supports('p', 'deepseek-ai/DeepSeek-V3', 'textOutput'), true);
+  assert.equal(atlas.supports('p', 'deepseek-ai/DeepSeek-V3', 'embeddings'), undefined);
+  assert.equal(atlas.model('p', 'Qwen/Qwen3-Embedding-8B')?.capabilities.embeddings?.source, 'endpoint');
+  assert.equal(atlas.supports('p', 'Qwen/Qwen3-Embedding-8B', 'textOutput'), false);
+  // Explicit modality arrays win over the combined string; OpenRouter spells the output "embeddings".
+  const or = createAtlas({ now, providers: [{ id: 'p', kind: 'openrouter' }], fetch: mock(() => ({ data: [
+    { id: 'e', architecture: { modality: 'text->text', input_modalities: ['text', 'image'], output_modalities: ['embeddings'] } },
+    { id: 'bad', architecture: { modality: '->' } },
+  ] })) });
+  await or.refresh();
+  assert.equal(or.supports('p', 'e', 'imageInput'), true); assert.equal(or.supports('p', 'e', 'embeddings'), true);
+  assert.deepEqual(or.model('p', 'bad')?.capabilities, {});
+});
+test('models.dev embedding type marks catalog embeddings', async () => {
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai' }], catalogs: [modelsDev({ providerMap: { p: 'nebius' } })],
+    fetch: mock(url => url.hostname === 'models.dev' ? fixture('modelsdev-api') : { data: [{ id: 'Qwen/Qwen3-Embedding-8B' }, { id: 'kimi-k3' }] }) });
+  assert.ok((await atlas.refresh()).every(r => r.ok));
+  assert.equal(atlas.model('p', 'Qwen/Qwen3-Embedding-8B')?.capabilities.embeddings?.source, 'catalog');
+  assert.equal(atlas.supports('p', 'kimi-k3', 'embeddings'), undefined);
+});
