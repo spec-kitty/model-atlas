@@ -1,0 +1,160 @@
+{
+ "data": [
+  {
+   "id": "kimi-k3",
+   "object": "model",
+   "created": 1677610602,
+   "owned_by": "tokenfactory",
+   "max_input_tokens": 983040,
+   "max_output_tokens": 65536,
+   "context_length": 1048576,
+   "context_window": 1048576,
+   "max_model_len": 1048576,
+   "max_completion_tokens": 65536,
+   "maximum_output_length": 65536,
+   "architecture": {
+    "input_modalities": [
+     "text",
+     "image"
+    ],
+    "output_modalities": [
+     "text"
+    ],
+    "modality": "text+image->text"
+   },
+   "top_provider": {
+    "context_length": 1048576,
+    "max_completion_tokens": 65536,
+    "is_moderated": false
+   },
+   "supported_parameters": [
+    "max_tokens",
+    "max_completion_tokens",
+    "temperature",
+    "top_p",
+    "stop",
+    "seed",
+    "response_format",
+    "structured_outputs",
+    "stream",
+    "tools",
+    "tool_choice",
+    "parallel_tool_calls",
+    "reasoning",
+    "include_reasoning",
+    "reasoning_effort"
+   ],
+   "capabilities": {
+    "tool_calling": true,
+    "parallel_tool_calls": true,
+    "reasoning": true,
+    "vision": true,
+    "structured_output": true
+   }
+  },
+  {
+   "id": "glm-5.3",
+   "object": "model",
+   "created": 1677610602,
+   "owned_by": "tokenfactory",
+   "max_input_tokens": 196608,
+   "max_output_tokens": 65536,
+   "context_length": 262144,
+   "context_window": 262144,
+   "max_model_len": 262144,
+   "max_completion_tokens": 65536,
+   "maximum_output_length": 65536,
+   "architecture": {
+    "input_modalities": [
+     "text"
+    ],
+    "output_modalities": [
+     "text"
+    ],
+    "modality": "text->text"
+   },
+   "top_provider": {
+    "context_length": 262144,
+    "max_completion_tokens": 65536,
+    "is_moderated": false
+   },
+   "supported_parameters": [
+    "max_tokens",
+    "max_completion_tokens",
+    "temperature",
+    "top_p",
+    "stop",
+    "seed",
+    "response_format",
+    "structured_outputs",
+    "stream",
+    "tools",
+    "tool_choice",
+    "parallel_tool_calls",
+    "reasoning",
+    "include_reasoning",
+    "reasoning_effort"
+   ],
+   "capabilities": {
+    "tool_calling": true,
+    "parallel_tool_calls": true,
+    "reasoning": true,
+    "vision": false,
+    "structured_output": true
+   }
+  },
+  {
+   "id": "deepseek-v4.1-flash-1017-uncensored-fp8",
+   "object": "model",
+   "created": 1677610602,
+   "owned_by": "tokenfactory",
+   "max_input_tokens": 983040,
+   "max_output_tokens": 65536,
+   "context_length": 1048576,
+   "context_window": 1048576,
+   "max_model_len": 1048576,
+   "max_completion_tokens": 65536,
+   "maximum_output_length": 65536,
+   "architecture": {
+    "input_modalities": [
+     "text",
+     "image"
+    ],
+    "output_modalities": [
+     "text"
+    ],
+    "modality": "text+image->text"
+   },
+   "top_provider": {
+    "context_length": 1048576,
+    "max_completion_tokens": 65536,
+    "is_moderated": false
+   },
+   "supported_parameters": [
+    "max_tokens",
+    "max_completion_tokens",
+    "temperature",
+    "top_p",
+    "stop",
+    "seed",
+    "response_format",
+    "structured_outputs",
+    "stream",
+    "tools",
+    "tool_choice",
+    "parallel_tool_calls",
+    "reasoning",
+    "include_reasoning",
+    "reasoning_effort"
+   ],
+   "capabilities": {
+    "tool_calling": true,
+    "parallel_tool_calls": true,
+    "reasoning": true,
+    "vision": true,
+    "structured_output": true
+   }
+  }
+ ],
+ "object": "list"
+}

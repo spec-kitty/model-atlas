@@ -1,0 +1,29 @@
+{
+  "models": [
+    {
+      "name": "accounts/fireworks/models/kimi-k3",
+      "displayName": "Kimi K3",
+      "kind": "HF_BASE_MODEL",
+      "state": "READY",
+      "supportsImageInput": true,
+      "supportsTools": true,
+      "supportsServerless": true,
+      "contextLength": 262144,
+      "defaultSamplingParams": { "temperature": 0.6, "top_p": 0.95 },
+      "deprecationDate": null
+    },
+    {
+      "name": "accounts/fireworks/models/qwen3-embedding-8b",
+      "displayName": "Qwen3 Embedding 8B",
+      "kind": "EMBEDDING_MODEL",
+      "state": "READY",
+      "supportsImageInput": false,
+      "supportsTools": false,
+      "supportsServerless": true,
+      "contextLength": 32768,
+      "deprecationDate": null
+    }
+  ],
+  "nextPageToken": "",
+  "totalSize": 2
+}

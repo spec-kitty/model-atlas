@@ -1,0 +1,746 @@
+{
+ "anthropic": {
+  "id": "anthropic",
+  "env": [
+   "ANTHROPIC_API_KEY"
+  ],
+  "npm": "@ai-sdk/anthropic",
+  "name": "Anthropic",
+  "doc": "https://docs.anthropic.com/en/docs/about-claude/models",
+  "models": {
+   "claude-haiku-4-5-20251001": {
+    "id": "claude-haiku-4-5-20251001",
+    "name": "Claude Haiku 4.5",
+    "description": "Fast Claude model for responsive assistance, classification, and lightweight agents",
+    "family": "claude-haiku",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "budget_tokens",
+      "min": 1024
+     }
+    ],
+    "tool_call": true,
+    "structured_output": true,
+    "temperature": true,
+    "knowledge": "2025-02-28",
+    "release_date": "2025-10-15",
+    "last_updated": "2025-10-15",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 200000,
+     "output": 64000
+    },
+    "cost": {
+     "input": 1,
+     "output": 5,
+     "cache_read": 0.1,
+     "cache_write": 1.25
+    }
+   },
+   "claude-haiku-5-5": {
+    "id": "claude-haiku-5-5",
+    "name": "Claude Haiku 5.5",
+    "description": "Fast Claude model for responsive assistance, classification, and lightweight agents",
+    "family": "claude-haiku",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "toggle"
+     },
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "medium",
+       "high",
+       "xhigh",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "structured_output": true,
+    "temperature": false,
+    "knowledge": "2026-06",
+    "release_date": "2026-10-07",
+    "last_updated": "2026-10-07",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 1000000,
+     "output": 128000
+    },
+    "cost": {
+     "input": 0.1,
+     "output": 0.5,
+     "cache_read": 0.01,
+     "cache_write": 0.125,
+     "tiers": [
+      {
+       "input": 0.5,
+       "output": 2.5,
+       "cache_read": 0.05,
+       "cache_write": 0.625,
+       "tier": {
+        "type": "context",
+        "size": 100000
+       }
+      }
+     ]
+    },
+    "canonical_model_id": "anthropic/claude-haiku-5-5"
+   },
+   "claude-haiku-4-5": {
+    "id": "claude-haiku-4-5",
+    "name": "Claude Haiku 4.5 (latest)",
+    "description": "Fast Claude lane for lightweight agents, office tasks, and responsive chat",
+    "family": "claude-haiku",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "budget_tokens",
+      "min": 1024
+     }
+    ],
+    "tool_call": true,
+    "structured_output": true,
+    "temperature": true,
+    "knowledge": "2025-02-28",
+    "release_date": "2025-10-15",
+    "last_updated": "2025-10-15",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 200000,
+     "output": 64000
+    },
+    "cost": {
+     "input": 1,
+     "output": 5,
+     "cache_read": 0.1,
+     "cache_write": 1.25
+    },
+    "canonical_model_id": "anthropic/claude-haiku-4-5"
+   }
+  }
+ },
+ "openai": {
+  "id": "openai",
+  "env": [
+   "OPENAI_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai",
+  "name": "OpenAI",
+  "doc": "https://platform.openai.com/docs/models",
+  "models": {
+   "gpt-5.4-mini": {
+    "id": "gpt-5.4-mini",
+    "name": "GPT-5.4 mini",
+    "description": "Strong small GPT for coding subagents, quick tool use, and high-volume work",
+    "family": "gpt-mini",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "none",
+       "low",
+       "medium",
+       "high",
+       "xhigh"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "structured_output": true,
+    "temperature": true,
+    "knowledge": "2025-08-31",
+    "release_date": "2026-03-17",
+    "last_updated": "2026-03-17",
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 400000,
+     "input": 272000,
+     "output": 128000
+    },
+    "experimental": {
+     "modes": {
+      "fast": {
+       "cost": {
+        "input": 1.5,
+        "output": 9,
+        "cache_read": 0.15
+       },
+       "provider": {
+        "body": {
+         "service_tier": "priority"
+        }
+       }
+      },
+      "flex": {
+       "cost": {
+        "input": 0.375,
+        "output": 2.25,
+        "cache_read": 0.0375
+       },
+       "provider": {
+        "body": {
+         "service_tier": "flex"
+        }
+       }
+      }
+     }
+    },
+    "cost": {
+     "input": 0.75,
+     "output": 4.5,
+     "cache_read": 0.075
+    }
+   }
+  }
+ },
+ "moonshotai": {
+  "id": "moonshotai",
+  "env": [
+   "MOONSHOT_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai-compatible",
+  "api": "https://api.moonshot.ai/v1",
+  "name": "Moonshot AI",
+  "doc": "https://platform.moonshot.ai/docs/api/chat",
+  "models": {
+   "kimi-k3.1-pro": {
+    "id": "kimi-k3.1-pro",
+    "name": "Kimi K3.1 Pro",
+    "description": "Multimodal Kimi model with 1M context and always-on reasoning for coding, 3D creation, financial research, and agentic work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-10-23",
+    "last_updated": "2026-10-23",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 1048576,
+     "output": 1048576
+    },
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.2,
+     "cache_write": 2
+    },
+    "canonical_model_id": "moonshotai/kimi-k3.1-pro"
+   },
+   "kimi-k3.1-pro-highspeed": {
+    "id": "kimi-k3.1-pro-highspeed",
+    "name": "Kimi K3.1 Pro Highspeed",
+    "description": "Multimodal Kimi model with 1M context and always-on reasoning for coding, 3D creation, financial research, and agentic work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-10-23",
+    "last_updated": "2026-10-23",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 1048576,
+     "output": 1048576
+    },
+    "cost": {
+     "input": 4,
+     "output": 20,
+     "cache_read": 0.2,
+     "cache_write": 4
+    },
+    "canonical_model_id": "moonshotai/kimi-k3.1-pro"
+   },
+   "kimi-k3": {
+    "id": "kimi-k3",
+    "name": "Kimi K3",
+    "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-07-16",
+    "last_updated": "2026-07-16",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1048576,
+     "output": 1048576
+    },
+    "cost": {
+     "input": 3,
+     "output": 15,
+     "cache_read": 0.3,
+     "cache_write": 3
+    },
+    "canonical_model_id": "moonshotai/kimi-k3"
+   }
+  }
+ },
+ "zhipuai": {
+  "id": "zhipuai",
+  "env": [
+   "ZHIPU_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai-compatible",
+  "api": "https://open.bigmodel.cn/api/paas/v4",
+  "name": "Zhipu AI",
+  "doc": "https://docs.bigmodel.cn/cn/guide/start/pricing",
+  "models": {
+   "glm-5.3-flash": {
+    "id": "glm-5.3-flash",
+    "name": "GLM-5.3-Flash",
+    "description": "Native multimodal GLM model for efficient coding and long-horizon agent tasks",
+    "family": "glm-flash",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": true,
+    "release_date": "2026-08-26",
+    "last_updated": "2026-08-26",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1000000,
+     "output": 131072
+    },
+    "cost": {
+     "input": 0.11952,
+     "output": 0.41831,
+     "cache_read": 0.03436,
+     "cache_write": 0
+    },
+    "canonical_model_id": "zhipuai/glm-5.3-flash"
+   },
+   "glm-5.3-flashx": {
+    "id": "glm-5.3-flashx",
+    "name": "GLM-5.3-FlashX",
+    "description": "High-speed GLM-5.3-Flash serving option for coding and agent workflows",
+    "family": "glm-flash",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": true,
+    "release_date": "2026-09-18",
+    "last_updated": "2026-09-18",
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1000000,
+     "output": 131072
+    },
+    "cost": {
+     "input": 0.29879,
+     "output": 1.04577,
+     "cache_read": 0.08516,
+     "cache_write": 0
+    },
+    "canonical_model_id": "zhipuai/glm-5.3-flash"
+   },
+   "glm-5.3": {
+    "id": "glm-5.3",
+    "name": "GLM-5.3",
+    "description": "Flagship GLM model for long-horizon coding, agents, and complex project delivery",
+    "family": "glm",
+    "attachment": false,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "high",
+       "max"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": true,
+    "release_date": "2026-08-14",
+    "last_updated": "2026-08-14",
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1000000,
+     "output": 131072
+    },
+    "cost": {
+     "input": 1.19516,
+     "output": 4.18306,
+     "cache_read": 0.29879,
+     "cache_write": 0
+    },
+    "canonical_model_id": "zhipuai/glm-5.3"
+   }
+  }
+ },
+ "fireworks-ai": {
+  "id": "fireworks-ai",
+  "env": [
+   "FIREWORKS_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai-compatible",
+  "api": "https://api.fireworks.ai/inference/v1/",
+  "name": "Fireworks AI",
+  "doc": "https://fireworks.ai/docs/",
+  "models": {
+   "accounts/fireworks/routers/kimi-k3-fast": {
+    "id": "accounts/fireworks/routers/kimi-k3-fast",
+    "name": "Kimi K3 Fast",
+    "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "toggle"
+     },
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "medium",
+       "high",
+       "max"
+      ]
+     },
+     {
+      "type": "budget_tokens",
+      "min": 1024
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-07-16",
+    "last_updated": "2026-07-16",
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1048576,
+     "output": 131072
+    },
+    "cost": {
+     "input": 4.5,
+     "output": 22.5,
+     "cache_read": 0.45
+    },
+    "canonical_model_id": "moonshotai/kimi-k3"
+   },
+   "accounts/fireworks/routers/kimi-k3-spot": {
+    "id": "accounts/fireworks/routers/kimi-k3-spot",
+    "name": "Kimi K3 Spot",
+    "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "toggle"
+     },
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "medium",
+       "high",
+       "max"
+      ]
+     },
+     {
+      "type": "budget_tokens",
+      "min": 1024
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-07-16",
+    "last_updated": "2026-07-16",
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1048576,
+     "output": 131072
+    },
+    "cost": {
+     "input": 2.1,
+     "output": 10.5,
+     "cache_read": 0.21
+    },
+    "canonical_model_id": "moonshotai/kimi-k3"
+   },
+   "accounts/fireworks/models/kimi-k3": {
+    "id": "accounts/fireworks/models/kimi-k3",
+    "name": "Kimi K3",
+    "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
+    "family": "kimi-k3",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "toggle"
+     },
+     {
+      "type": "effort",
+      "values": [
+       "low",
+       "medium",
+       "high",
+       "max"
+      ]
+     },
+     {
+      "type": "budget_tokens",
+      "min": 1024
+     }
+    ],
+    "tool_call": true,
+    "interleaved": {
+     "field": "reasoning_content"
+    },
+    "structured_output": true,
+    "temperature": false,
+    "release_date": "2026-07-16",
+    "last_updated": "2026-07-16",
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": true,
+    "limit": {
+     "context": 1048576,
+     "output": 131072
+    },
+    "experimental": {
+     "modes": {
+      "priority": {
+       "cost": {
+        "input": 3.75,
+        "output": 18.75,
+        "cache_read": 0.375
+       },
+       "provider": {
+        "body": {
+         "service_tier": "priority"
+        }
+       }
+      }
+     }
+    },
+    "cost": {
+     "input": 3,
+     "output": 15,
+     "cache_read": 0.3
+    },
+    "canonical_model_id": "moonshotai/kimi-k3"
+   }
+  }
+ }
+}
