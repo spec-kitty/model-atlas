@@ -54,7 +54,7 @@ const evidence = atlas.explain('tokenfactory', 'kimi-k3');
 
 ## Providers and published data
 
-Each config has `{ id, kind, baseUrl?, apiKey?, headers?, account? }`. `id` is your stable provider identifier, independent of upstream vendor names. IDs must be unique safe identifiers (letters, digits, `.`, `_`, `-`). Provider IDs and catalog IDs have separate namespaces. Headers are request-only; an explicit `apiKey` sets the protocol's auth header. Anthropic's API version is `2023-06-01`.
+Each config has `{ id, kind, baseUrl?, apiKey?, headers?, account?, listingParams? }`. `id` is your stable provider identifier, independent of upstream vendor names. IDs must be unique safe identifiers (letters, digits, `.`, `_`, `-`). Provider IDs and catalog IDs have separate namespaces. Headers are request-only; an explicit `apiKey` sets the protocol's auth header. Anthropic's API version is `2023-06-01`.
 
 | Kind | Default listing / base convention | Auth and pagination |
 | --- | --- | --- |
@@ -63,6 +63,8 @@ Each config has `{ id, kind, baseUrl?, apiKey?, headers?, account? }`. `id` is y
 | `openai-compatible` | Required `baseUrl` + `/models`, e.g. `https://gateway.example/v1/models` | Bearer; also tries origin + `/model/info`; that optional call's failure is silent |
 | `openrouter` | `https://openrouter.ai/api/v1/models`; custom base includes `/api/v1` | Optional Bearer; listing is public |
 | `fireworks` | `https://api.fireworks.ai/v1/accounts/{account}/models?pageSize=200`; account defaults to `fireworks` | Bearer; follows `nextPageToken` using `pageToken` |
+
+`listingParams` adds query parameters to the listing request only, never to `/model/info` or probes; for example Nebius Token Factory publishes modalities only with `{ verbose: 'true' }`.
 
 `baseUrl` can override any provider for tests or proxies. Fireworks probes use `https://api.fireworks.ai/inference/v1/chat/completions` by default, including when `baseUrl` explicitly names the default control plane (`https://api.fireworks.ai/v1`). Other custom bases are also used for probes. For separate custom Fireworks control-plane and inference origins, use a separate `openai-compatible` provider config for inference.
 
@@ -78,7 +80,7 @@ Gateway survey, **verified 1 November 2026** (a dated survey, not a promised cur
 
 Normalization detects **each entry's shape**, regardless of configured kind, and merges all recognized fields within that entry. TokenFactory's modalities and flat flags both contribute claims. LiteLLM nulls create no claims; its generic `supported_openai_params` is not treated as model-specific evidence. Invalid entries are counted in refresh reports; invalid optional values are ignored. Unknown fields are discarded.
 
-Two documented defaults are the only assumptions: models on an `anthropic` provider support tools (`source: 'default'`), and IDs beginning `text-embedding-` get an embeddings default. No other capability is inferred from model names. Generic `file` input and models.dev's `attachment` flag do not establish PDF support; PDF remains unknown without explicit evidence. An explicit `pdf` modality establishes support; PDF's absence from a modality list does not establish rejection. Other absent modalities in a valid explicit modality list are false; missing sampling parameters in an explicit `supported_parameters` list are false. Missing non-sampling parameters remain unknown.
+Two documented defaults are the only assumptions: models on an `anthropic` provider support tools (`source: 'default'`), and IDs beginning `text-embedding-` get an embeddings default. No other capability is inferred from model names. Generic `file` input and models.dev's `attachment` flag do not establish PDF support; PDF remains unknown without explicit evidence. The combined OpenRouter-style `architecture.modality` string (`text+image->text`) is read when the separate modality arrays are absent. An `embedding` or `embeddings` output modality, or models.dev's `type: "embedding"`, establishes embeddings support; its absence does not establish rejection. An explicit `pdf` modality establishes support; PDF's absence from a modality list does not establish rejection. Other absent modalities in a valid explicit modality list are false; missing sampling parameters in an explicit `supported_parameters` list are false. Missing non-sampling parameters remain unknown.
 
 ## Claims and precedence
 
