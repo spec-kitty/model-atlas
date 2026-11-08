@@ -1,3 +1,16 @@
+---
+title: DeepSeek review dispositions — 1 November 2026
+description: Per-finding dispositions for the independent DeepSeek code review.
+doc_status: active
+updated: 2026-11-08
+type: Operations
+kind: Reference
+tags: [validation, review]
+authors:
+  - human:stijn
+  - agent/claude-code
+---
+
 # DeepSeek review dispositions — 1 November 2026
 
 Reviewed current source at `43bd34a`, including that commit's changes. IDs below follow the original bullet order within each section; severity headings identify the reviewer's grouping, not an endorsed severity assessment. Every bullet, including self-retracted observations and test gaps, has a disposition.
@@ -84,7 +97,7 @@ Six code findings accepted (B1/B2 partially, M2/M7/M13/M24); two already fixed; 
 
 ## Test gaps
 
-New public-API coverage is in [review-regressions.test.ts](../test/review-regressions.test.ts); transport cases are in [transport.test.ts](../test/transport.test.ts). Existing coverage was checked in [atlas.test.ts](../test/atlas.test.ts), [normalizers.test.ts](../test/normalizers.test.ts), and [probes.test.ts](../test/probes.test.ts). Accepted gaps require tests only, not changes to correct implementation behavior.
+New public-API coverage is in [review-regressions.test.ts](../../test/review-regressions.test.ts); transport cases are in [transport.test.ts](../../test/transport.test.ts). Existing coverage was checked in [atlas.test.ts](../../test/atlas.test.ts), [normalizers.test.ts](../../test/normalizers.test.ts), and [probes.test.ts](../../test/probes.test.ts). Accepted gaps require tests only, not changes to correct implementation behavior.
 
 | ID | Allegedly missing case | Disposition | Evidence / added assertion |
 | --- | --- | --- | --- |

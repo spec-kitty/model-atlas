@@ -1,3 +1,16 @@
+---
+title: Validation — 1 November 2026
+description: Local, cross-version and live smoke validation results for the 0.1.0 line.
+doc_status: active
+updated: 2026-11-08
+type: Operations
+kind: Reference
+tags: [validation, review]
+authors:
+  - human:stijn
+  - agent/claude-code
+---
+
 # Validation — 1 November 2026
 
 ## Local checks
@@ -17,7 +30,7 @@ Unit tests use fixture JSON and injected fetch only. No test contacts a live end
 
 ## Independent review follow-up
 
-- DeepSeek follow-up: per-bullet decisions for all 99 review items are in [DEEPSEEK-REVIEW.md](DEEPSEEK-REVIEW.md); six code issues and 36 coverage gaps accepted, two items already fixed, 55 rejected.
+- DeepSeek follow-up: per-bullet decisions for all 99 review items are in [DEEPSEEK-REVIEW.md](./deepseek-review-2026-11-01.md); six code issues and 36 coverage gaps accepted, two items already fixed, 55 rejected.
 - DeepSeek follow-up: `npm run build`, `npm run typecheck`, `npm test`, and `git diff --check` pass; 63 tests on Node 25.2.1, with mocked network responses only.
 
 - Node 25.2.1: `npm run build`, `npm run typecheck`, `npm test` — passed, 48 tests.

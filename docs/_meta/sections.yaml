@@ -1,0 +1,48 @@
+# Authored section registry (DocKitty). Reserved, non-content.
+version: 1
+sections:
+  - id: context
+    label: Context
+    order: 10
+    type: Context
+  - id: architecture
+    label: Architecture
+    order: 20
+    type: Architecture
+  - id: adr
+    label: Decision Records
+    order: 30
+    type: ADR
+  - id: plans
+    label: Plans
+    order: 40
+    type: Plan
+    feeds: [sitemap, llms, agent]
+  - id: api
+    label: API
+    order: 50
+    type: API
+  - id: configuration
+    label: Configuration
+    order: 60
+    type: Configuration
+  - id: integrations
+    label: Integrations
+    order: 70
+    type: Integration
+  - id: security
+    label: Security
+    order: 80
+    type: Security
+  - id: guides
+    label: Guides
+    order: 90
+    type: Guide
+  - id: operations
+    label: Operations
+    order: 100
+    type: Operations
+  - id: changelog
+    label: Changelog
+    order: 110
+    type: Changelog
