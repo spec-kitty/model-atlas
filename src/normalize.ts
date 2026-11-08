@@ -89,7 +89,9 @@ export function normalize(raw: unknown, ctx: NormalizeContext, catalog = false):
   add('limits.contextTokens', r.context_length);
   const architecture = object(r.architecture);
   // Some listings (e.g. Nebius verbose) publish only the combined "text+image->text" form.
-  const [inputs, outputs] = string(architecture.modality) ? architecture.modality.split('->').map(m => m.split('+')) : [];
+  // Only the exact "inputs->outputs" form is evidence; anything else makes no claim.
+  const parts = string(architecture.modality) ? architecture.modality.split('->') : [];
+  const [inputs, outputs] = parts.length === 2 ? parts.map(m => m.split('+')) : [];
   modality(architecture.input_modalities ?? inputs, architecture.output_modalities ?? outputs);
   if (strings(r.supported_parameters)) {
     const params = r.supported_parameters;
