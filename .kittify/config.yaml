@@ -1,0 +1,16 @@
+project:
+  uuid: 4204fe52-14d8-4a65-a20f-a61c31e29c85
+  slug: model-atlas
+  node_id: b84c17aba871
+  build_id: f840fac2-e4df-527a-a365-1cb06708b5f8
+vcs:
+  type: git
+agents:
+  available:
+  - claude
+  - codex
+  auto_commit: true
+  lint_on_edit: false
+languages:
+- typescript
+charter: .kittify/charter/charter.yaml

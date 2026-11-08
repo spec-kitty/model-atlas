@@ -1,0 +1,46 @@
+schema_version: 1.0.0
+mission: software-dev
+profile: minimal
+answers:
+  project_intent: Deliver predictable changes with clear reviewability.
+  languages_frameworks: Use only the languages, frameworks, and tools explicitly
+    declared by this project.
+  testing_requirements: Use the project's declared test approach. If none is 
+    declared, mark it as NEEDS CLARIFICATION.
+  quality_gates: Only require the quality gates explicitly declared by this 
+    project before merge.
+  review_policy: At least one focused reviewer approves before merge.
+  performance_targets: CLI operations should complete quickly (typically under 2
+    seconds).
+  deployment_constraints: Must run on macOS and Linux developer environments.
+selected_paradigms:
+- trunk-based
+- brownfield-onboarding
+selected_directives:
+- 001-architectural-integrity-standard
+- 003-decision-documentation-requirement
+- 010-specification-fidelity-requirement
+- 024-locality-of-change
+- 030-test-and-typecheck-quality-gate
+- 050-credential-handling-discipline
+- 051-supply-chain-install-safety
+- 034-test-first-development
+- 036-black-box-integration-testing
+- 041-tests-as-scaffold-not-friction
+- 043-close-defect-class-by-construction
+- 037-living-documentation-sync
+- 042-common-docs
+- 048-version-governance
+- 025-boy-scout-rule
+- 029-agent-commit-signing-policy
+- 033-targeted-staging-policy
+- 046-readable-consistent-prs
+selected_tactics: []
+available_tools:
+- git
+- npm
+- node
+- typescript
+- gh
+agent_profile:
+agent_role:
