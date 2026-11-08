@@ -11,3 +11,6 @@ agents:
   - codex
   auto_commit: true
   lint_on_edit: false
+languages:
+- typescript
+charter: .kittify/charter/charter.yaml
