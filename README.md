@@ -64,7 +64,7 @@ Each config has `{ id, kind, baseUrl?, apiKey?, headers?, account?, listingParam
 | `openrouter` | `https://openrouter.ai/api/v1/models`; custom base includes `/api/v1` | Optional Bearer; listing is public |
 | `fireworks` | `https://api.fireworks.ai/v1/accounts/{account}/models?pageSize=200`; account defaults to `fireworks` | Bearer; follows `nextPageToken` using `pageToken` |
 
-`listingParams` adds query parameters to the listing request only, never to `/model/info` or probes; for example Nebius Token Factory publishes modalities only with `{ verbose: 'true' }`.
+`listingParams` adds query parameters to the listing request only, never to `/model/info` or probes; for example Nebius Token Factory publishes modalities only with `{ verbose: 'true' }`. Values must be strings; anything else fails the source before a request. They are not treated as secrets and are not redacted, so put credentials in `apiKey` or `headers`.
 
 `baseUrl` can override any provider for tests or proxies. Fireworks probes use `https://api.fireworks.ai/inference/v1/chat/completions` by default, including when `baseUrl` explicitly names the default control plane (`https://api.fireworks.ai/v1`). Other custom bases are also used for probes. For separate custom Fireworks control-plane and inference origins, use a separate `openai-compatible` provider config for inference.
 
