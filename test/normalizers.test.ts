@@ -197,3 +197,12 @@ test('malformed combined modality strings make no claims', async () => {
   assert.deepEqual(atlas.model('p', 'three')?.capabilities, {});
   assert.deepEqual(atlas.model('p', 'bare')?.capabilities, {});
 });
+test('malformed listing params fail the source without a request', async () => {
+  for (const listingParams of ['ab', { verbose: true }, { nested: {} }, ['x']] as never[]) {
+    let calls = 0;
+    const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openai-compatible', baseUrl: 'https://gateway.test/v1', listingParams }],
+      fetch: mock(() => { calls++; return { data: [] }; }) });
+    const [report] = await atlas.refresh();
+    assert.equal(report?.ok, false); assert.equal(calls, 0);
+  }
+});
