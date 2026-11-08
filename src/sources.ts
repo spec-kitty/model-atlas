@@ -10,7 +10,11 @@ export async function loadProvider(config: ProviderConfig, request: Transport, a
   const source = `provider:${config.id}`;
   const path = config.kind === 'anthropic' ? 'v1/models' : config.kind === 'fireworks' ? `accounts/${encodeURIComponent(config.account ?? 'fireworks')}/models` : 'models';
   const url = append(base, path);
-  for (const [key, value] of Object.entries(config.listingParams ?? {})) url.searchParams.set(key, value);
+  const params: unknown = config.listingParams ?? {};
+  if (typeof params !== 'object' || params === null || Array.isArray(params) || !Object.values(params).every(v => typeof v === 'string')) {
+    throw new Error('Invalid listing params');
+  }
+  for (const [key, value] of Object.entries(params as Record<string, string>)) url.searchParams.set(key, value);
   if (config.kind === 'anthropic') url.searchParams.set('limit', '1000');
   if (config.kind === 'fireworks') url.searchParams.set('pageSize', '200');
   const models = new Map<string, StoredModel>(); let skipped = 0;
