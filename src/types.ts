@@ -25,7 +25,7 @@ export type ProviderKind = 'anthropic' | 'openai' | 'openai-compatible' | 'openr
 export interface ProviderConfig {
   id: string; kind: ProviderKind; baseUrl?: string; apiKey?: string;
   headers?: Record<string, string>; account?: string;
-  /** Extra query parameters for the model listing request only, e.g. `{ verbose: 'true' }`. */
+  /** Extra query parameters for the model listing request only, e.g. `{ verbose: 'true' }`. Not treated as secret: put credentials in `apiKey` or `headers`. */
   listingParams?: Record<string, string>;
 }
 export interface CatalogConfig {
