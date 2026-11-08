@@ -188,3 +188,12 @@ test('models.dev embedding type marks catalog embeddings', async () => {
   assert.equal(atlas.model('p', 'Qwen/Qwen3-Embedding-8B')?.capabilities.embeddings?.source, 'catalog');
   assert.equal(atlas.supports('p', 'kimi-k3', 'embeddings'), undefined);
 });
+test('malformed combined modality strings make no claims', async () => {
+  const atlas = createAtlas({ now, providers: [{ id: 'p', kind: 'openrouter' }], fetch: mock(() => ({ data: [
+    { id: 'three', architecture: { modality: 'text->image->text' } },
+    { id: 'bare', architecture: { modality: 'text' } },
+  ] })) });
+  await atlas.refresh();
+  assert.deepEqual(atlas.model('p', 'three')?.capabilities, {});
+  assert.deepEqual(atlas.model('p', 'bare')?.capabilities, {});
+});
